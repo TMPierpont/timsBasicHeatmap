@@ -16,9 +16,10 @@ timsBasicHeatmap <- function(means, pvalues){ #just takes means and pvalues of g
   
   savePDF <- "no"
   if(savePDF == "yes"){pdf(paste0(directory,"/pdf/",name,"-Heatmap.pdf"), width = 16, height = 8)}
+  #means <- values
   
-  Y <- ncol(means)
-  X <- nrow(means)
+  X <- ncol(means)
+  Y <- nrow(means)
   
   for(y in 1:Y) {
     for(x in 1:X) {

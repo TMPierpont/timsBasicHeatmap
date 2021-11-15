@@ -1,0 +1,47 @@
+---
+title: "timsBasicVingette"
+author: "Timothy M Pierpont"
+date: "11/15/2021"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r intro, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This vignette is for the package timsBasicHeatmap
+
+While anyone is free to use this, the code is barely begun to be packaged, so it may or may not be useful for you... This package is more of a test package for the author, Tim.
+
+It uses two identically sized matricies to make a heatmap of values (0-1) and overlay pvalues (1 line for p<0.05, 2 lines for p<0.005). The only input are these two matricies using the function _timsBasicHeatmap_
+
+Column and row names of the first matrix are used to populate the heatmap.
+
+Currently, no other options exist, just passing those two matricies.
+
+
+```{r cars}
+summary(cars)
+```
+
+## A quick example
+
+values <- matrix(rnorm(18),nrow=3) #Generates values matrix with random numbers
+colnames(values) <- c("CD4","CD8","CD8 Memory","CD8 Naive","Bread","Toast") #Names phenotypes
+rownames(values) <- c("Controls","Veh Control","Experimental") #Names groups
+pvalues <- abs(matrix(rnorm(18),nrow=3))/5 #Generates pvalues matrix with random numbers that are low and above zero
+
+#these lines simply adjust the numbers in the matricies to look more like you'd expect, they're not necassary for the example
+values[1:2,] <- abs(rnorm(6)/3)
+pvalues[1,] <- 1
+pvalues[2,] <- abs(rnorm(6))
+pvalues[3,] <- abs(rnorm(6)/100)
+
+
+
+library("timsBasicHeatmap") #Loads the library
+timsBasicHeatmap(values,pvalues) #Runs the heatmap with those two matrices
