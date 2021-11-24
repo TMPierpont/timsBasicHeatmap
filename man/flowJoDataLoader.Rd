@@ -5,7 +5,7 @@
 \title{This grabs flowjo files and extracts data
 I could make this combine the files, but it'll be easier to use and more versitle if we just combine them outside this function}
 \usage{
-flowJoDataLoader(sample_list, file, fcs_files, sample_info)
+flowJoDataLoader(sample_list, file, fcs_files, sample_info, main_event = NULL)
 }
 \description{
 This grabs flowjo files and extracts data

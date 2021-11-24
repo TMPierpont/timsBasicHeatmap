@@ -6,11 +6,12 @@ flowJoDataLoader <- function(
 sample_list, #sample info reference list
 file, #flowjo File
 fcs_files, #directory with FCS files
-sample_info #The columns that are not counts or samples that are to be transferred from the sample info sheet
+sample_info, #The columns that are not counts or samples that are to be transferred from the sample info sheet
+main_event = NULL #The population you want to treat as the main population when calculating totals.
 ) {
   ws <- open_flowjo_xml(file)
   
-  gs <- flowjo_to_gatingset(ws, name = 1, path = fcs_files)
+  gs <- flowjo_to_gatingset(ws, name = 2, path = fcs_files)
   nodelist <- gs_get_pop_paths(gs, path = "full")
   shortnodeList  <- gs_get_pop_paths(gs, path = "auto")
 
@@ -47,7 +48,8 @@ sample_info #The columns that are not counts or samples that are to be transferr
     myData$new_col <- gs_pop_get_stats(gs, nodes = nodelist[i])[,3]
 
     #Get % total by dividing by total events ("Root")
-    myData$new_col <- myData$new_col / gs_pop_get_stats(gs, nodes = nodelist[1])[,3]
+    if (is.null(main_event)) {root <- nodelist[1]} else { root <- main_event}
+    myData$new_col <- myData$new_col / gs_pop_get_stats(gs, nodes = root)[,3]
     #Multiply by total counts
     myData$new_col <- myData$new_col * as.numeric(myData$counts)
     colnames(myData)[ncol(myData)] = paste("Total", shortnodeList[i])
