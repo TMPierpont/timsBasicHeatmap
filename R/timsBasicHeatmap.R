@@ -264,3 +264,24 @@ PVHeatmapDrawP <- function(sig) {
     grid.rect(x=.5,y=.5,width=1,height = 0.001, gp=gpar(fill=rgb(0,0,0,0), col=rgb(1,1,1,1)))
   }
 }
+
+#' @export
+ezColRenamer <- function(df, old, new) {
+  #changes column names from the first list, to the second list
+  
+  #df is the dataframe to ac
+  #old is the list or single name of the column to change
+  #new is the list or single new name for the respective column in old
+  
+  if (length(old) == length(new)) {
+    for (i in 1:length(old)) {
+      colnames(df)[which(colnames(df) == old[i])] <- new[i]
+    }
+  }
+  return(df)
+}
+    
+    
+    
+    
+    
