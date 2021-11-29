@@ -10,7 +10,7 @@ flowDataCruncher <- function(
   subgroup = NULL, #If you have sub groups identified, this column will split them into however many sub boxes are needed.
   ID, #Column that gives the ID of the samples
   ignore, #The columns you want to ignore/ not be graphed or used
-  
+  combine_groups = NULL, #Set this to combine groups, takes a list c(name_of_new_column, list_of_columns_to_combine)
   control_group, #The group that is the control group for the Dunnett test, #HOWEVER THIS NEEDS TO BE ADDED TO THE SCRIPT!
   
   range = 1 #this changes the range shown in the colors (1 is log2 fold change range -1 to 1),
@@ -50,7 +50,6 @@ flowDataCruncher <- function(
       subgroup_names <- NULL
     } else {
       subgroup_names <- unique(my_data[which(colnames(my_data) == subgroup)])
-      
       colnames(my_data)[which(colnames(my_data) == subgroup)] <- "qqqwww"
     }
   }
@@ -62,10 +61,20 @@ flowDataCruncher <- function(
       print("not enough groups")
     } else {
       colnames(my_data)[which(colnames(my_data) == group)] <- "group"
-      colnames(my_data)[which(colnames(my_data) == "qqqwww")] <- "subgroup"
     }
   }
   
+  #Are there group names to combine? If so, combine them.
+  if (!is.null(combine_groups)) {
+    new_name <- combine_groups[1]
+    old_names <- combine_groups[-1]
+    for (a in 1:length(old_names)) {#Loop and get rid of the old group names
+      my_data[which(my_data$group == old_names[a]), 'group'] <- new_name
+    }
+  }
+ 
+  if (!is.null(subgroup)) {colnames(my_data)[which(colnames(my_data) == "qqqwww")] <- "subgroup"}
+   
   for(i in 1:type_subgroup) { #if there's more than one subgroup, we'll want to build a multidimensional arrays
     for(ii in 1:(ncol(my_data))) {
       if (colnames(my_data)[ii] == "group" || colnames(my_data)[ii] == "subgroup") {next} #don't graph these guys
@@ -112,13 +121,14 @@ flowDataCruncher <- function(
       #I'll want to add the bit about the ANOVA testing and stuff, but for now this will test things
       ############
       
-      if (exists('means_2d')) {
-        means_2d[ncol(means_2d)+1] <- normed/range
-        colnames(means_2d)[ncol(means_2d)] = population
+
+      if (exists('Nmeans_2d')) {
+        Nmeans_2d[ncol(Nmeans_2d)+1] <- normed/range
+        colnames(Nmeans_2d)[ncol(Nmeans_2d)] = population
       } else {
-        means_2d <- normed/range
-        rownames(means_2d) <- means[,1]
-        colnames(means_2d)[1] = population
+        Nmeans_2d <- normed/range
+        rownames(Nmeans_2d) <- means[,1]
+        colnames(Nmeans_2d)[1] = population
       }
       
       if (exists('sem_high_2d')) {
@@ -147,27 +157,39 @@ flowDataCruncher <- function(
         rownames(pvalues_2d) <- means[,1]
         colnames(pvalues_2d)[1] = population
       }
-      
+ 
+      if (exists('means_2d')) {
+        means_2d[ncol(means_2d)+1] <- means[,2]
+        colnames(means_2d)[ncol(means_2d)] = population
+      } else {
+        means_2d <- means[2]
+        rownames(means_2d) <- means[,1]
+        colnames(means_2d)[1] = population
+      }
+           
     }
     
     if (exists('full_data')) {
-      full_data[,,1,i] <- as.matrix(means_2d)
+      full_data[,,1,i] <- as.matrix(Nmeans_2d)
       full_data[,,2,i] <- as.matrix(sem_high_2d)
       full_data[,,3,i] <- as.matrix(sem_low_2d)
       full_data[,,4,i] <- as.matrix(pvalues_2d)
+      full_data[,,5,i] <- as.matrix(means_2d)
+      
     } else {
-      matrix_names <- c("means", "SEM high", "SEM low", "pvalues")
+      matrix_names <- c("normalized means", "SEM high", "SEM low", "pvalues", "means")
       test <- c(as.matrix(subgroup_names))
-      full_data <- array(c(as.matrix(means_2d), as.matrix(sem_high_2d), as.matrix(sem_low_2d), as.matrix(pvalues_2d)), 
-        dim = c(nrow(means_2d),ncol(means_2d),4,type_subgroup),
-        dimnames = list(rownames(means_2d), colnames(means_2d), matrix_names, test))
+      full_data <- array(c(as.matrix(Nmeans_2d), as.matrix(sem_high_2d), as.matrix(sem_low_2d), as.matrix(pvalues_2d), as.matrix(means_2d)), 
+        dim = c(nrow(Nmeans_2d),ncol(Nmeans_2d),5,type_subgroup),
+        dimnames = list(rownames(Nmeans_2d), colnames(Nmeans_2d), matrix_names, test))
     }
     
-    rm(means_2d)
+    rm(Nmeans_2d)
     rm(sem_high_2d)
     rm(sem_low_2d)
     rm(pvalues_2d)
-    
+    rm(means_2d)    
   }
   return(full_data)
 }
+

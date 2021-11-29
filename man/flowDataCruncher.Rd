@@ -12,6 +12,7 @@ flowDataCruncher(
   subgroup = NULL,
   ID,
   ignore,
+  combine_groups = NULL,
   control_group,
   range = 1
 )

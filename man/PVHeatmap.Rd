@@ -26,6 +26,10 @@ PVHeatmap(
   nudge_map_horizontal = 0,
   gap = 0.1,
   box_size = NULL,
+  border_width = 1,
+  sub_border_intensity = 0.5,
+  sub_border_width = 1,
+  combine_pvalue = FALSE,
   justify_y = 0,
   sort_y = NULL
 )

@@ -24,7 +24,7 @@ PVHeatmap <- function(
   font_size = NULL, #Font size, will set base size of fonts, title will be this * 1.3
   font_size_x = NULL, #Specific font size for x axis
   font_size_y = NULL, #Specific font size for y axis
-  font_size_title = NULL, #Speicify font size for title.
+  font_size_title = NULL, #Specify font size for title.
   
   #These will let you push title, map, or either axis around a bit
   nudge_title_verticle = 0,
@@ -38,6 +38,10 @@ PVHeatmap <- function(
   gap = .1, #Fraction of boxes that are given between boxes
   box_size = NULL, #fraction of screen size that a box size will be
   
+  border_width = 1,#changes the width of the final black border
+  sub_border_intensity = .5, #changes the intensity of the inner border if there are subgroups shown
+  sub_border_width = 1, #changes the width of the inner border if there are subgroups shown
+  combine_pvalue = FALSE, #If you have multiple subgroups
   justify_y = 0, #will take -1 to 1
   sort_y = NULL #If this exists then it'll reorganize the data to match
   ){ #just takes means and pvalues of graphs, makes a reasonable sized heatmap
@@ -46,14 +50,16 @@ PVHeatmap <- function(
   #If this is crunched data, then sort that out properly first.
   if (crunched_data) {
     crunched_data <- values
-    
+    rm(values)
+
     if (!is.null(sort_y)) {
       reorder_y <- match(sort_y,rownames(crunched_data))
       if (any(is.na(reorder_y))) {
         print("Not all y axis names given match actual row names given")
         print(sort(sort_y))
         print(sort(rownames(crunched_data)))
-        }
+        return(NULL)
+      }
       crunched_data <- crunched_data[reorder_y,,,]
     }
     
@@ -67,7 +73,7 @@ PVHeatmap <- function(
       sem_low <- crunched_data[,,3,1]
       pvalues <- crunched_data[,,4,1]
     } else {
-      pvalues <- sem_low <- sem_high <- values <- array(dim=c(nrow(values),ncol(values),num_of_matrix))
+      pvalues <- sem_low <- sem_high <- values <- array(dim=c(nrow(crunched_data),ncol(crunched_data),num_of_matrix))
       for(a in 1:num_of_matrix) {
         values[,,a] <- crunched_data[,,1,a]
         sem_high[,,a] <- crunched_data[,,2,a]
@@ -77,9 +83,11 @@ PVHeatmap <- function(
       rownames(values) <- rownames(sem_high) <- rownames(sem_low) <- rownames(pvalues) <- rownames(crunched_data)
       colnames(values) <- colnames(sem_high) <- colnames(sem_low) <- colnames(pvalues) <- colnames(crunched_data)
     }
+  } else {
+    values <- values
   }
   layers <- length(dim(values)) #Check if this is a simple heatmap, or one with several layers
-  graphics.off()#clear plot
+  #graphics.off()#clear plot
   ratio <- dev.size("px")[1] / dev.size("px")[2] #Get screen ratio
   
   if (transpose) {
@@ -119,8 +127,6 @@ PVHeatmap <- function(
   if (!is.null(title)) {nudge_map_verticle = nudge_map_verticle-2*box_size}
   nudge_map_horizontal = nudge_map_horizontal*box_size
   
-
-  
   grid.text(title, just=0,x=.5+nudge_title_horizontal, y=.95+nudge_title_verticle, rot=0,
             gp=gpar(fontsize=hm_font_title, col="black"))
   SEMsize = .1
@@ -135,6 +141,7 @@ PVHeatmap <- function(
         print("Not all y axis names given match actual row names given")
         print(sort(sort_y))
         print(sort(rownames(crunched_data)))
+        return(NULL)
       }
       values <- values[reorder_y,]
       if (!is.null(sem_high)) {sem_high <- sem_high[reorder_y,]}
@@ -167,14 +174,13 @@ PVHeatmap <- function(
           PVHeatmapDrawP(pvalues[y,x])
         }
         
-        grid.rect(x=.5,y=.5,width=1,height = 1, gp=gpar(fill=rgb(0,0,0,0), col=rgb(0,0,0,1))) #Draws border around box
-        vp <- popViewport(0) #Pop the port
+        grid.rect(x=.5,y=.5,width=1,height = 1, gp=gpar(fill=rgb(0,0,0,0), col=rgb(0,0,0,1), lwd=border_width)) #Draws border around box
+        vp <- popViewport() #Pop the port
       }
     }
     
   } else if (layers > 2) { #For drawing several boxes inside a single box
     exps <- dim(values)[3] #then get the number of matrices, this will be how many times we loop
-    
     #Make sure the order is what the person wants
     if (!is.null(sort_y)) {
       reorder_y <- match(sort_y,rownames(values))
@@ -188,7 +194,6 @@ PVHeatmap <- function(
       if (!is.null(sem_low)) {sem_low <- sem_low[reorder_y,,]}
       if (!is.null(pvalues)) {pvalues <- pvalues[reorder_y,,]}
     }
-    
       for(y in 1:Y) {
         for(x in 1:X) {
           ## Create a viewport, rectangle
@@ -201,7 +206,7 @@ PVHeatmap <- function(
             
             #Add base color
             color <- PVHeatmapColor(values[y,x,z])
-            grid.rect(x=0.5, y=0.5, height=1,width=1,gp=gpar(fill=color,col=rgb(0,0,0,1)))
+            grid.rect(x=0.5, y=0.5, height=1,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
             
             #Was SEM provided? then draw the SEMs
             if (!is.null(sem_high)) {
@@ -215,13 +220,17 @@ PVHeatmap <- function(
             
             #were pvalues given? add them if so
             if (!is.null(pvalues)) {
-              PVHeatmapDrawP(pvalues[y,x,z])
+              if (combine_pvalue) {
+                PVHeatmapDrawP(max(pvalues[y,x,]))
+              } else {
+                PVHeatmapDrawP(pvalues[y,x,z])
+              }
             }
-            grid.rect(x=.5,y=.5,width=1,height = 1, gp=gpar(fill=rgb(0,0,0,0), col=rgb(0,0,0,.5))) #Draws border around box
-            vp <- popViewport(1)
+            grid.rect(x=.5,y=.5,width=1,height = 1, gp=gpar(fill=rgb(0,0,0,0), col=rgb(0,0,0, sub_border_intensity), lwd=sub_border_width)) #Draws border around box
+            vp <- popViewport()
           }
-          grid.rect(x=.5,y=.5,width=1,height = 1, gp=gpar(fill=rgb(0,0,0,0), col=rgb(0,0,0,1))) #Draws border around box
-          vp <- popViewport(0) #Pop the port
+          grid.rect(x=.5,y=.5,width=1,height = 1, gp=gpar(fill=rgb(0,0,0,0), col=rgb(0,0,0,1), lwd=border_width)) #Draws border around box
+          vp <- popViewport() #Pop the port
         }
       }
     
