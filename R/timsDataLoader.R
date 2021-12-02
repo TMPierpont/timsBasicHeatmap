@@ -34,8 +34,10 @@ debug=FALSE
   sample_list$sample <- str_remove(sample_list$sample, "\\(1\\)") #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
   myData$sample <- str_remove(myData$sample, "\\(1\\)") #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
 
-  if (debug) {cat("... good!\nPulling sample list info from into new dataframe and combining it with cleaned IDs from the WSP file")}    
+  if (debug) {cat("... good!\nPulling sample list info from into new dataframe and combining it with cleaned IDs from the WSP file\n")}   
+  
     for (i in 1:nrow(myData)) {
+      if (debug) {cat(paste("\r    Hunting for:",myData[i,'sample']))}
     replaceNum <- which(sample_list$sample %like% paste0(myData[i,'sample'],"%"))
     myData[i,'counts'] <- sample_list[replaceNum,'counts']
       for (a in 1:length(sample_info)) {
