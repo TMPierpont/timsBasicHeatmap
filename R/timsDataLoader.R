@@ -38,8 +38,7 @@ debug=FALSE
   
     for (i in 1:nrow(myData)) {
       if (debug) {cat(paste("\r    Hunting for:",myData[i,'sample']))}
-    #replaceNum <- which(sample_list$sample %like% paste0(myData[i,'sample'],"%"))
-    replaceNum <- str_which(sample_list$sample, paste0(myData[i,'sample'],"$"))
+    replaceNum <- stringr::str_which(sample_list$sample, paste0(myData[i,'sample'],"$"))
     myData[i,'counts'] <- sample_list[replaceNum,'counts']
       for (a in 1:length(sample_info)) {
         myData[i, sample_info[a]] <- sample_list[replaceNum, sample_info[a]]
