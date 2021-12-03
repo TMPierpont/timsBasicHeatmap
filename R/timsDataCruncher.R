@@ -11,9 +11,7 @@ flowDataCruncher <- function(
   ID, #Column that gives the ID of the samples
   ignore, #The columns you want to ignore/ not be graphed or used
   combine_groups = NULL, #Set this to combine groups, takes a list c(name_of_new_column, list_of_columns_to_combine)
-  control_group, #The group that is the control group for the Dunnett test, #HOWEVER THIS NEEDS TO BE ADDED TO THE SCRIPT!
-  
-  range = 1 #this changes the range shown in the colors (1 is log2 fold change range -1 to 1),
+  control_group = NULL #The group that is the control group for the Dunnett test, #HOWEVER THIS NEEDS TO BE ADDED TO THE SCRIPT!
 ) {
   
   my_data <- as.data.frame(my_data)
@@ -72,9 +70,9 @@ flowDataCruncher <- function(
       my_data[which(my_data$group == old_names[a]), 'group'] <- new_name
     }
   }
- 
+
   if (!is.null(subgroup)) {colnames(my_data)[which(colnames(my_data) == "qqqwww")] <- "subgroup"}
-   
+ 
   for(i in 1:type_subgroup) { #if there's more than one subgroup, we'll want to build a multidimensional arrays
     for(ii in 1:(ncol(my_data))) {
       if (colnames(my_data)[ii] == "group" || colnames(my_data)[ii] == "subgroup") {next} #don't graph these guys
@@ -97,12 +95,12 @@ flowDataCruncher <- function(
       graphData <- dplyr::filter(graphData, !is.na(graphData$value)) #Just delete any rows without numbers
       means <- aggregate(graphData['value'], list(graphData$group), mean)
       conMeans <- dplyr::filter(means, means$Group.1 == control_group)[1,2]
-      normed <- log2(means[2] / as.numeric(conMeans))/range
+      normed <- log2(means[2] / as.numeric(conMeans))
       pvalues <- SEM_high <- SEM_low <- SEM <- means #lazy way to recreate the new matrix, meh, probably a better way but this setup works
       for(a in 1:nrow(SEM)) {
         SEM[a,2] = std.error(graphData[which(graphData$group==SEM[a,1]),'value'])
       }
-      
+            
       SEM_high[2] <- log2((means[2] + SEM[2]) / as.numeric(conMeans))
       SEM_low[2] <- log2((means[2] - SEM[2]) / as.numeric(conMeans))
       
@@ -114,7 +112,7 @@ flowDataCruncher <- function(
       for(a in 2:nrow(SEM)) {
         pvalues[a,2] <- Dunnett$Control[[a-1,4]]
       }
-      
+   
       #That's all for the hard stuff, now just package it up...
       
       ############
@@ -123,28 +121,28 @@ flowDataCruncher <- function(
       
 
       if (exists('Nmeans_2d')) {
-        Nmeans_2d[ncol(Nmeans_2d)+1] <- normed/range
+        Nmeans_2d[ncol(Nmeans_2d)+1] <- normed
         colnames(Nmeans_2d)[ncol(Nmeans_2d)] = population
       } else {
-        Nmeans_2d <- normed/range
+        Nmeans_2d <- normed
         rownames(Nmeans_2d) <- means[,1]
         colnames(Nmeans_2d)[1] = population
       }
       
       if (exists('sem_high_2d')) {
-        sem_high_2d[ncol(sem_high_2d)+1] <- SEM_high[2]/range
+        sem_high_2d[ncol(sem_high_2d)+1] <- SEM_high[2]
         colnames(sem_high_2d)[ncol(sem_high_2d)] = population
       } else {
-        sem_high_2d <- SEM_high[2]/range
+        sem_high_2d <- SEM_high[2]
         rownames(sem_high_2d) <- means[,1]
         colnames(sem_high_2d)[1] = population
       }
       
       if (exists('sem_low_2d')) {
-        sem_low_2d[ncol(sem_low_2d)+1] <- SEM_low[2]/range
+        sem_low_2d[ncol(sem_low_2d)+1] <- SEM_low[2]
         colnames(sem_low_2d)[ncol(sem_low_2d)] = population
       } else {
-        sem_low_2d <- SEM_low[2]/range
+        sem_low_2d <- SEM_low[2]
         rownames(sem_low_2d) <- means[,1]
         colnames(sem_low_2d)[1] = population
       }

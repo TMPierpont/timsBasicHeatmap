@@ -13,8 +13,7 @@ flowDataCruncher(
   ID,
   ignore,
   combine_groups = NULL,
-  control_group,
-  range = 1
+  control_group = NULL
 )
 }
 \description{

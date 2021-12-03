@@ -43,8 +43,12 @@ PVHeatmap <- function(
   sub_border_width = 1, #changes the width of the inner border if there are subgroups shown
   combine_pvalue = FALSE, #If you have multiple subgroups
   justify_y = 0, #will take -1 to 1
-  sort_y = NULL #If this exists then it'll reorganize the data to match
-  ){ #just takes means and pvalues of graphs, makes a reasonable sized heatmap
+  sort_y = NULL, #If this exists then it'll reorganize the data to match
+  sort_x = NULL, #If this exists then it'll reorganize the data to match
+  font_family = "Sans", #Lets you change the type of font
+  
+  range = 1 #this changes the range shown in the colors (1 is log2 fold change range -1 to 1),
+  ){
   
   
   #If this is crunched data, then sort that out properly first.
@@ -52,6 +56,8 @@ PVHeatmap <- function(
     crunched_data <- values
     rm(values)
 
+    
+    #This will sort the groups
     if (!is.null(sort_y)) {
       reorder_y <- match(sort_y,rownames(crunched_data))
       if (any(is.na(reorder_y))) {
@@ -128,7 +134,7 @@ PVHeatmap <- function(
   nudge_map_horizontal = nudge_map_horizontal*box_size
   
   grid.text(title, just=0,x=.5+nudge_title_horizontal, y=.95+nudge_title_verticle, rot=0,
-            gp=gpar(fontsize=hm_font_title, col="black"))
+            gp=gpar(fontsize=hm_font_title,  font = font_family, col="black"))
   SEMsize = .1
   
   #For single box experiments
@@ -156,17 +162,17 @@ PVHeatmap <- function(
         pushViewport(vp)
         
         #Add base color
-        color <- PVHeatmapColor(values[y,x])
+        color <- PVHeatmapColor(values[y,x]/range)
         grid.rect(x=0.5, y=0.5, height=1,width=1,gp=gpar(fill=color,col=rgb(0,0,0,1)))
         
         #Was SEM provided? then draw the SEMs
         if (!is.null(sem_high)) {
-          color <- PVHeatmapColor(sem_high[y,x])
-          grid.rect(x=0.5, y=SEMsize/2, height=SEMsize,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
+          color <- PVHeatmapColor(sem_high[y,x]/range)
+          grid.rect(x=0.5, y=1-SEMsize/2, height=SEMsize,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
         }
         if (!is.null(sem_low)) {
-          color <- PVHeatmapColor(sem_low[y,x])
-          grid.rect(x=0.5, y=1-SEMsize/2, height=SEMsize,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
+          color <- PVHeatmapColor(sem_low[y,x]/range)
+          grid.rect(x=0.5, y=SEMsize/2, height=SEMsize,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
         }      
         
         #were pvalues given? add them if so
@@ -205,17 +211,17 @@ PVHeatmap <- function(
             pushViewport(vp)
             
             #Add base color
-            color <- PVHeatmapColor(values[y,x,z])
+            color <- PVHeatmapColor(values[y,x,z]/range)
             grid.rect(x=0.5, y=0.5, height=1,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
             
             #Was SEM provided? then draw the SEMs
             if (!is.null(sem_high)) {
-              color <- PVHeatmapColor(sem_high[y,x,z])
-              grid.rect(x=0.5, y=SEMsize/2, height=SEMsize,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
+              color <- PVHeatmapColor(sem_high[y,x,z]/range)
+              grid.rect(x=0.5, y=1-SEMsize/2, height=SEMsize,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
             }
             if (!is.null(sem_low)) {
-              color <- PVHeatmapColor(sem_low[y,x,z])
-              grid.rect(x=0.5, y=1-SEMsize/2, height=SEMsize,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
+              color <- PVHeatmapColor(sem_low[y,x,z]/range)
+              grid.rect(x=0.5, y=SEMsize/2, height=SEMsize,width=1,gp=gpar(fill=color,col=rgb(0,0,0,0)))
             }      
             
             #were pvalues given? add them if so
@@ -235,15 +241,15 @@ PVHeatmap <- function(
       }
     
   }
-  
+  font_family
   for(x in 1:X) {
     grid.text(colnames(values)[x], just=0,x=x*box_size/ratio+nudge_map_horizontal+nudge_x_axis_horizontal, y=(1+nudge_map_verticle+nudge_x_axis_verticle)-(Y+1)*box_size, rot=-90,
-              gp=gpar(fontsize=hm_font_x, col="black"))
+              gp=gpar(fontsize=hm_font_x, font = font_family,  col="black"))
   }
   
   for(y in 1:Y) {
     grid.text(rownames(values)[y], just=justify_y,x=(X+1)*box_size/ratio+nudge_y_axis_horizontal+nudge_map_horizontal, y=1+nudge_map_verticle+nudge_y_axis_verticle-y*box_size, rot=,
-              gp=gpar(fontsize=hm_font_y, col="black"))
+              gp=gpar(fontsize=hm_font_y, font = font_family, "bold", col="black"))
   }
   
 }
@@ -290,7 +296,38 @@ ezColRenamer <- function(df, old, new) {
   return(df)
 }
     
-    
-    
-    
+#' @export
+ezColSorter <- function(df, order) {
+  reorder_x <- match(order,colnames(df))
+  if (any(is.na(reorder_x))) {
+    if (length(order) < length(colnames(df))) {#then you're missing one from the input
+      print("You're missing something from the new order, where is:")
+      print(colnames(df)[is.na(reorder_x)])
+    } else if (length(order) > length(colnames(df))) {#Then you have something extra in the input
+      print("You have more in the sort list than columns, Couldn't find this in the columns:")
+      print(order[is.na(reorder_x)])
+    } else {
+      print("You have the right number of columns to sort, but something doesn't match... is it these?")
+      print(paste0("New order list: ", order[is.na(reorder_x)]))       
+      print(paste0("Column names: ", colnames(df)[(is.na(reorder_x))]))               
+    }
+    print("Not all x axis names given match actual column names given")
+    print(reorder_x)
+  }
+  df <- df[,reorder_x,,]
+  return(df[,-which(is.na(colnames(df))),,])
+}
+
+#' @export
+ezColRemover <- function(df, columns) {
+  #This removes columns, but ignores if they're already not there
+  for (i in 1:length(columns)) {
+    exists = length(which(colnames(df) == columns[i]))
+    if(exists > 0) {
+      #if it exists, then delete it
+      df <- df[-which(colnames(df) == columns[i])]
+    }
+  }
+  return(df)
+}    
     

@@ -3,6 +3,8 @@
 export(PVHeatmap)
 export(PVHeatmapColor)
 export(PVHeatmapDrawP)
+export(ezColRemover)
 export(ezColRenamer)
+export(ezColSorter)
 export(flowDataCruncher)
 export(flowJoDataLoader)

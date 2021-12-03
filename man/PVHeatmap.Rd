@@ -31,7 +31,10 @@ PVHeatmap(
   sub_border_width = 1,
   combine_pvalue = FALSE,
   justify_y = 0,
-  sort_y = NULL
+  sort_y = NULL,
+  sort_x = NULL,
+  font_family = "Sans",
+  range = 1
 )
 }
 \description{
