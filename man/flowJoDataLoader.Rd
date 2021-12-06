@@ -12,6 +12,7 @@ flowJoDataLoader(
   sample_info = NULL,
   main_event = NULL,
   debug = FALSE,
+  group = NULL,
   counts = "counts",
   volumes = "volumes",
   samples = "sample"

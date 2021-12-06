@@ -8,6 +8,7 @@ fcs_files, #directory with FCS files
 sample_info = NULL, #The columns that are not counts or samples that are to be transferred from the sample info sheet
 main_event = NULL, #The population you want to treat as the main population when calculating totals.
 debug=FALSE,
+group=NULL,
 counts="counts",#This is the column with cell counts in your sample list per ml
 volumes="volumes", #This is the column with total volumes of your cell count
 samples="sample"#this is the column with your sample IDs in your sample list
