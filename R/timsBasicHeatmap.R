@@ -177,7 +177,7 @@ PVHeatmap <- function(
         
         #were pvalues given? add them if so
         if (!is.null(pvalues)) {
-          PVHeatmapDrawP(pvalues[y,x])
+          PVHeatmapDrawP(pvalues[y,x],border_width)
         }
         
         grid.rect(x=.5,y=.5,width=1,height = 1, gp=gpar(fill=rgb(0,0,0,0), col=rgb(0,0,0,1), lwd=border_width)) #Draws border around box
@@ -227,9 +227,9 @@ PVHeatmap <- function(
             #were pvalues given? add them if so
             if (!is.null(pvalues)) {
               if (combine_pvalue) {
-                PVHeatmapDrawP(max(pvalues[y,x,]))
+                PVHeatmapDrawP(max(pvalues[y,x,]),border_width)
               } else {
-                PVHeatmapDrawP(pvalues[y,x,z])
+                PVHeatmapDrawP(pvalues[y,x,z],border_width)
               }
             }
             grid.rect(x=.5,y=.5,width=1,height = 1, gp=gpar(fill=rgb(0,0,0,0), col=rgb(0,0,0, sub_border_intensity), lwd=sub_border_width)) #Draws border around box
@@ -271,12 +271,13 @@ PVHeatmapColor <- function(num){
 }
 
 #' @export
-PVHeatmapDrawP <- function(sig) {
+PVHeatmapDrawP <- function(sig, border_width=NULL) {
+  if (is.null(border_width)) {border_width=1}
   
   if (sig<.005) {
-    grid.rect(x=.5,y=.5,width=1,height = .15, gp=gpar(lwd=2, fill=rgb(0,0,0,0), col=rgb(1,1,1,1)))
+    grid.rect(x=.5,y=.5,width=1,height = .15, gp=gpar(fill=rgb(0,0,0,0), col=rgb(1,1,1,1), lwd=border_width))
   } else if (sig<.05) {
-    grid.rect(x=.5,y=.5,width=1,height = 0.001, gp=gpar(lwd=2, fill=rgb(0,0,0,0), col=rgb(1,1,1,1)))
+    grid.rect(x=.5,y=.5,width=1,height = 0.001, gp=gpar(fill=rgb(0,0,0,0), col=rgb(1,1,1,1), lwd=border_width))
   }
 }
 

@@ -21,6 +21,13 @@ samples="sample"#this is the column with your sample IDs in your sample list
   nodelist <- gs_get_pop_paths(gs, path = "full")
   shortnodeList  <- gs_get_pop_paths(gs, path = "auto")
 
+  #remove any column manes that are NA or are actually called NA (excel imports do that sometimes)
+  if (any(is.na(colnames(sample_list)))) { #Check before doing this one or it'll cause an error
+    sample_list <- sample_list[-which(is.na(colnames(sample_list)))]  
+  }
+  if (any(is.na(colnames(sample_list)))) { #Check before doing this one or it'll cause an error  
+    sample_list <- sample_list[-which(colnames(sample_list)=="NA")]   
+  }
   ######################
   #match the sample file to the myData DF
   ######################
@@ -84,7 +91,7 @@ samples="sample"#this is the column with your sample IDs in your sample list
 
     if(any(str_detect(colnames(sample_list), counts))){
       if(any(str_detect(colnames(sample_list), volumes))){ #Are volumes provided?
-        sample_list[counts] <-sample_list[volumes]*sample_list[counts]} else {warning("No volumes found, using counts only")}
+        sample_list[counts] <- sample_list[volumes]*sample_list[counts]} else {warning("No volumes found, using counts only")}
       #Get % total by dividing by total events ("Root")
       myData['new_col'] <- myData$new_col / gs_pop_get_stats(gs, nodes = root)[,3]
       #Multiply by total counts
