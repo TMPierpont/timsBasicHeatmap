@@ -82,8 +82,9 @@ samples="sample"#this is the column with your sample IDs in your sample list
   for (i in 2:length(nodelist)) {
     myData['new_col'] <- gs_pop_get_stats(gs, nodes = nodelist[i])[,3]
 
-    if(str_detect(colnames(sample_list), counts)){    #Are counts provided?
-      if(str_detect(colnames(sample_list), volumes)){ #Are volumes provided?
+    if(any(str_detect(colnames(sample_list), counts))){
+      print("yes")#Are counts provided?
+      if(any(str_detect(colnames(sample_list), volumes))){ #Are volumes provided?
         sample_list[counts] <-sample_list[volumes]*sample_list[counts]} else {warning:"No volumes found, using counts only"}
       #Get % total by dividing by total events ("Root")
       myData['new_col'] <- myData$new_col / gs_pop_get_stats(gs, nodes = root)[,3]

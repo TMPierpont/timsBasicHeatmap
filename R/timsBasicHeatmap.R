@@ -274,9 +274,9 @@ PVHeatmapColor <- function(num){
 PVHeatmapDrawP <- function(sig) {
   
   if (sig<.005) {
-    grid.rect(x=.5,y=.5,width=1,height = .15, gp=gpar(fill=rgb(0,0,0,0), col=rgb(1,1,1,1)))
+    grid.rect(x=.5,y=.5,width=1,height = .15, gp=gpar(lwd=2, fill=rgb(0,0,0,0), col=rgb(1,1,1,1)))
   } else if (sig<.05) {
-    grid.rect(x=.5,y=.5,width=1,height = 0.001, gp=gpar(fill=rgb(0,0,0,0), col=rgb(1,1,1,1)))
+    grid.rect(x=.5,y=.5,width=1,height = 0.001, gp=gpar(lwd=2, fill=rgb(0,0,0,0), col=rgb(1,1,1,1)))
   }
 }
 
