@@ -50,7 +50,13 @@ PVHeatmap <- function(
   range = 1 #this changes the range shown in the colors (1 is log2 fold change range -1 to 1),
   ){
   
-  
+  #is the graphing plot in use? close it down... This does also mean that we won't be able to save the graph as a png for now
+  devs = dev.list()
+  if (any(names(devs) == "png")) {
+    devID <- as.numeric(which(names(devs) == "png"))
+    dev.off(devID)
+    
+  }  
   #If this is crunched data, then sort that out properly first.
   if (crunched_data) {
     crunched_data <- values
