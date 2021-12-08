@@ -10,8 +10,8 @@ flowDataCruncher(
   type = NULL,
   group,
   subgroup = NULL,
-  ID,
-  ignore,
+  ID = NULL,
+  ignore = NULL,
   combine_groups = NULL,
   control_group = NULL
 )

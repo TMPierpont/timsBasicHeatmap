@@ -8,8 +8,8 @@ flowDataCruncher <- function(
   type = NULL, #If you have multiple types, this identifies the column
   group, #These are the groups that get compared, give the column name
   subgroup = NULL, #If you have sub groups identified, this column will split them into however many sub boxes are needed.
-  ID, #Column that gives the ID of the samples
-  ignore, #The columns you want to ignore/ not be graphed or used
+  ID=NULL, #Column that gives the ID of the samples
+  ignore=NULL, #The columns you want to ignore/ not be graphed or used
   combine_groups = NULL, #Set this to combine groups, takes a list c(name_of_new_column, list_of_columns_to_combine)
   control_group = NULL #The group that is the control group for the Dunnett test, #HOWEVER THIS NEEDS TO BE ADDED TO THE SCRIPT!
 ) {
@@ -17,15 +17,19 @@ flowDataCruncher <- function(
   my_data <- as.data.frame(my_data)
 
   #remove columns I won't need
-  for (a in 1:length(ignore)) {
-    if (length(which(colnames(my_data) == ignore[a])) == 1) {#Is there a type column?
-      my_data <- my_data[-which(colnames(my_data) == ignore[a])] #Then delete it.
+  if (!is.null(ignore)){
+    for (a in 1:length(ignore)) {
+      if (length(which(colnames(my_data) == ignore[a])) == 1) {#Is there a type column?
+        my_data <- my_data[-which(colnames(my_data) == ignore[a])] #Then delete it.
+      }
     }
   }
   
   #remove samples for now as well
-  if (length(which(colnames(my_data) == ID)) == 1) {#Is there a type column?
-    my_data <- my_data[-which(colnames(my_data) == ID)] #Then delete it.
+  if (!is.null(ID)){
+    if (length(which(colnames(my_data) == ID)) == 1) {#Is there a type column?
+      my_data <- my_data[-which(colnames(my_data) == ID)] #Then delete it.
+    }
   }
   
   #Are there multiple types?
@@ -61,6 +65,13 @@ flowDataCruncher <- function(
       colnames(my_data)[which(colnames(my_data) == group)] <- "group"
     }
   }
+
+  #If the group is numeric, we need to fix that
+  if (apply(my_data['group'], 2, is.numeric)) {
+    max_sample <- nchar(toString(max(my_data['group']))) #get the biggest number, convert it to string, and then count the characters
+    temp_list <- unlist(as.list(my_data['group'])) #yes... I know I made it a list and unlisted, but somehow that's the only way I could find to get the desired type
+    my_data['group'] <- formatC(temp_list, width=max_sample, flag="0") #then convert them to 00x format as characters
+  }
   
   #Are there group names to combine? If so, combine them.
   if (!is.null(combine_groups)) {
@@ -91,10 +102,13 @@ flowDataCruncher <- function(
       } else { #If there isn't any subgroups, then just pull the whole thing over
         graphData <- graphDataMain
       }
+      
+      #rename control group to "control"
+      graphData$group[which(graphData$group == control_group)] <- "Control"
 
       graphData <- dplyr::filter(graphData, !is.na(graphData$value)) #Just delete any rows without numbers
       means <- aggregate(graphData['value'], list(graphData$group), mean)
-      conMeans <- dplyr::filter(means, means$Group.1 == control_group)[1,2]
+      conMeans <- dplyr::filter(means, means$Group.1 == "Control")[1,2]
       normed <- log2(means[2] / as.numeric(conMeans))
       pvalues <- SEM_high <- SEM_low <- SEM <- means #lazy way to recreate the new matrix, meh, probably a better way but this setup works
       for(a in 1:nrow(SEM)) {
@@ -107,12 +121,12 @@ flowDataCruncher <- function(
       #Get the stats
       ANOVA <- aov(value ~ group, data = graphData)
       ANOVA <- summary(ANOVA)[[1]][["Pr(>F)"]][[1]]  
-      Dunnett <- DunnettTest(x = graphData$value, g = as.factor(graphData$group))
+      Dunnett <- DescTools::DunnettTest(x = graphData$value, control = "Control", g = as.factor(graphData$group))
       pvalues[1,2] <- 1
       for(a in 2:nrow(SEM)) {
         pvalues[a,2] <- Dunnett$Control[[a-1,4]]
       }
-   
+
       #That's all for the hard stuff, now just package it up...
       
       ############
@@ -188,6 +202,9 @@ flowDataCruncher <- function(
     rm(pvalues_2d)
     rm(means_2d)    
   }
+  
+  #change back the control group
+  rownames(full_data)[rownames(full_data) == "Control"] = control_group
   return(full_data)
 }
 
