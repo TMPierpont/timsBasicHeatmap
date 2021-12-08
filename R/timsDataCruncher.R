@@ -14,8 +14,15 @@ flowDataCruncher <- function(
   control_group = NULL #The group that is the control group for the Dunnett test, #HOWEVER THIS NEEDS TO BE ADDED TO THE SCRIPT!
 ) {
   
-  my_data <- as.data.frame(my_data)
+  
+  #If the group is numeric, we need to fix that
+  if (apply(my_data[group], 2, is.numeric)) {
+    max_sample <- nchar(toString(max(my_data[group]))) #get the biggest number, convert it to string, and then count the characters
+    temp_list <- unlist(as.list(my_data[group])) #yes... I know I made it a list and unlisted, but somehow that's the only way I could find to get the desired type
+    my_data[group] <- formatC(temp_list, width=max_sample, flag="0") #then convert them to 00x format as characters
+  }
 
+  
   #remove columns I won't need
   if (!is.null(ignore)){
     for (a in 1:length(ignore)) {
@@ -66,12 +73,12 @@ flowDataCruncher <- function(
     }
   }
 
-  #If the group is numeric, we need to fix that
-  if (apply(my_data['group'], 2, is.numeric)) {
-    max_sample <- nchar(toString(max(my_data['group']))) #get the biggest number, convert it to string, and then count the characters
-    temp_list <- unlist(as.list(my_data['group'])) #yes... I know I made it a list and unlisted, but somehow that's the only way I could find to get the desired type
-    my_data['group'] <- formatC(temp_list, width=max_sample, flag="0") #then convert them to 00x format as characters
-  }
+  
+  
+  my_data <- as.data.frame(my_data)
+  my_data$group[which(my_data$group == control_group)] <- "Control"
+  my_data$group <- paste0("zz-zz", my_data$group)
+  my_data$group[which(my_data$group == "zz-zzControl")] <- "Control"  
   
   #Are there group names to combine? If so, combine them.
   if (!is.null(combine_groups)) {
@@ -86,6 +93,7 @@ flowDataCruncher <- function(
  
   for(i in 1:type_subgroup) { #if there's more than one subgroup, we'll want to build a multidimensional arrays
     for(ii in 1:(ncol(my_data))) {
+      #print(paste("sub_box",ii,"is",subgroup_names))
       if (colnames(my_data)[ii] == "group" || colnames(my_data)[ii] == "subgroup") {next} #don't graph these guys
 
       graphDataMain <- my_data[which(colnames(my_data) == "group")]
@@ -104,8 +112,6 @@ flowDataCruncher <- function(
       }
       
       #rename control group to "control"
-      graphData$group[which(graphData$group == control_group)] <- "Control"
-
       graphData <- dplyr::filter(graphData, !is.na(graphData$value)) #Just delete any rows without numbers
       means <- aggregate(graphData['value'], list(graphData$group), mean)
       conMeans <- dplyr::filter(means, means$Group.1 == "Control")[1,2]
@@ -203,8 +209,10 @@ flowDataCruncher <- function(
     rm(means_2d)    
   }
   
-  #change back the control group
+  #change back the control group, these two changes were to get the control group to always sort as the top even if the unique subgroups are integers
   rownames(full_data)[rownames(full_data) == "Control"] = control_group
+  rownames(full_data) <- str_remove(rownames(full_data), "zz-zz")
+  
   return(full_data)
 }
 
