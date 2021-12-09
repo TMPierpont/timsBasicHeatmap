@@ -34,7 +34,10 @@ PVHeatmap(
   sort_y = NULL,
   sort_x = NULL,
   font_family = "Sans",
-  range = 1
+  range = 1,
+  legend = FALSE,
+  legend_coords = c(0.9, 0.5),
+  legend_dims = c(0.01, 0.2)
 )
 }
 \description{

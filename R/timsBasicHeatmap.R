@@ -47,7 +47,10 @@ PVHeatmap <- function(
   sort_x = NULL, #If this exists then it'll reorganize the data to match
   font_family = "Sans", #Lets you change the type of font
   
-  range = 1 #this changes the range shown in the colors (1 is log2 fold change range -1 to 1),
+  range = 1, #this changes the range shown in the colors (1 is log2 fold change range -1 to 1),
+  legend = FALSE, #draw a legend if requested
+  legend_coords = c(.9,.5), #coordinates of the legend (x and y respectively)
+  legend_dims = c(.01,.2) #width and height of legend respectively
   ){
   
   #is the graphing plot in use? close it down... This does also mean that we won't be able to save the graph as a png for now
@@ -94,6 +97,7 @@ PVHeatmap <- function(
       }
       rownames(values) <- rownames(sem_high) <- rownames(sem_low) <- rownames(pvalues) <- rownames(crunched_data)
       colnames(values) <- colnames(sem_high) <- colnames(sem_low) <- colnames(pvalues) <- colnames(crunched_data)
+      dimnames(values)[[3]] <- dimnames(crunched_data)[[4]]
     }
   } else {
     values <- values
@@ -192,6 +196,8 @@ PVHeatmap <- function(
     }
     
   } else if (layers > 2) { #For drawing several boxes inside a single box
+    cat("sub box names and order are:")
+    print(dimnames(values)[[3]]) #print out the dim names so people will know which sub box is what.
     exps <- dim(values)[3] #then get the number of matrices, this will be how many times we loop
     #Make sure the order is what the person wants
     if (!is.null(sort_y)) {
@@ -256,6 +262,21 @@ PVHeatmap <- function(
   for(y in 1:Y) {
     grid.text(rownames(values)[y], just=justify_y,x=(X+1)*box_size/ratio+nudge_y_axis_horizontal+nudge_map_horizontal, y=1+nudge_map_verticle+nudge_y_axis_verticle-y*box_size, rot=,
               gp=gpar(fontsize=hm_font_y, font = font_family, "bold", col="black"))
+  }
+
+  if (legend) {  
+    vp<-viewport(x=legend_coords[1],y=legend_coords[2],width=legend_dims[1],height=legend_dims[2])
+    pushViewport(vp)
+    for(l in 1:99) {
+      color <- PVHeatmapColor(l/50-1)
+      grid.rect(x=1,y=l/100+.5,width=1,height = .01, gp=gpar(col=rgb(0,0,0,0), fill=color)) #draws the actual heatmap
+    }
+     grid.rect(x=1,y=1,width=1,height =1, gp=gpar(fill=rgb(0,0,0,0),col=rgb(0,0,1,1))) #Draws border around box
+     grid.text(range,x=2.2,y=1.5)
+     grid.text("0",x=2.2,y=1)
+     grid.text(range*-1,x=2.2,y=.5)
+      vp <- popViewport() #Pop the port  
+    
   }
   
 }
