@@ -73,13 +73,6 @@ flowDataCruncher <- function(
     }
   }
 
-  
-  
-  my_data <- as.data.frame(my_data)
-  my_data$group[which(my_data$group == control_group)] <- "Control"
-  my_data$group <- paste0("zz-zz", my_data$group)
-  my_data$group[which(my_data$group == "zz-zzControl")] <- "Control"  
-  
   #Are there group names to combine? If so, combine them.
   if (!is.null(combine_groups)) {
     new_name <- combine_groups[1]
@@ -89,6 +82,13 @@ flowDataCruncher <- function(
     }
   }
 
+  #This needs to happen to make sure the control group is always the first group... Only because I can't figure out how to get the Dunnett test to work properly otherwise.
+    my_data <- as.data.frame(my_data)
+    my_data$group[which(my_data$group == control_group)] <- "Control"
+    my_data$group <- paste0("zz-zz", my_data$group)
+    my_data$group[which(my_data$group == "zz-zzControl")] <- "Control"  
+  
+  
   if (!is.null(subgroup)) {colnames(my_data)[which(colnames(my_data) == "qqqwww")] <- "subgroup"}
  
   for(i in 1:type_subgroup) { #if there's more than one subgroup, we'll want to build a multidimensional arrays
