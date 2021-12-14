@@ -41,7 +41,7 @@ samples="sample"#this is the column with your sample IDs in your sample list
   }
   
   if (debug) {cat("... good!\nremoving any '(1)' from sample list")}  
-  myData[sample] <- str_remove(myData[sample], "\\(1\\)") #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
+  #myData[samples] <- str_remove(myData[samples], "\\(1\\)") #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
   
   #Check to see if the sample IDs are numeric, and if they are, then convert them to string and add 00s as appropriate to equalize the characters used
   if (debug) {cat("... good!\nChecking if sample IDs are numeric, converting if necassary\n")}   
@@ -50,14 +50,14 @@ samples="sample"#this is the column with your sample IDs in your sample list
     temp_list <- unlist(as.list(sample_list[samples])) #yes... I know I made it a list and unlisted, but somehow that's the only way I could find to get the desired type
     sample_list[samples] <- formatC(temp_list, width=max_sample, flag="0") #then convert them to 00x format as characters
     temp_list <- as.numeric(unlist(as.list(myData[samples])))
-    myData[sample] <- formatC(temp_list, width=max_sample, flag="0") #same for FCS sample IDs
+    myData[samples] <- formatC(temp_list, width=max_sample, flag="0") #same for FCS sample IDs
   } else {
     if (grepl(sample_list[samples], "\\(1\\)", fixed=TRUE)) {string = string = sample_list[samples] <- str_remove(sample_list[samples], "\\(1\\)")} #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
   }
   
   #Making sure sample names are unique
   if (any(duplicated(sample_list[samples]))) {warning("You have duplicate sample IDs in your sample list!")}
-  if (any(duplicated(myData[sample]))) {warning("You have duplicate sample IDs in your WSP files!")}
+  if (any(duplicated(myData[samples]))) {warning("You have duplicate sample IDs in your WSP files!")}
   if (debug) {cat("... good!\nPulling sample list info from into new dataframe and combining it with cleaned IDs from the WSP file\n")}   
   
     for (i in 1:nrow(myData)) {
