@@ -3,7 +3,7 @@
 \name{flowJoDataLoader}
 \alias{flowJoDataLoader}
 \title{This grabs flowjo files and extracts data
-I could make this combine the files, but it'll be easier to use and more versitle if we just combine them outside this function}
+I could make this combine the files, but it'll be easier to use and more versatile if we just combine them outside this function}
 \usage{
 flowJoDataLoader(
   sample_list,
@@ -20,5 +20,5 @@ flowJoDataLoader(
 }
 \description{
 This grabs flowjo files and extracts data
-I could make this combine the files, but it'll be easier to use and more versitle if we just combine them outside this function
+I could make this combine the files, but it'll be easier to use and more versatile if we just combine them outside this function
 }

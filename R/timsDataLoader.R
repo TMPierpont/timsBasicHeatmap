@@ -1,5 +1,6 @@
+
 #' This grabs flowjo files and extracts data
-#' I could make this combine the files, but it'll be easier to use and more versitle if we just combine them outside this function
+#' I could make this combine the files, but it'll be easier to use and more versatile if we just combine them outside this function
 #' @export
 flowJoDataLoader <- function(
 sample_list, #sample info reference list
@@ -63,7 +64,7 @@ samples="sample"#this is the column with your sample IDs in your sample list
     for (i in 1:nrow(myData)) {
       if (debug) {cat(paste("\r    Hunting for:",myData[i,'sample']))}
     replaceNum <- stringr::str_which(unlist(as.list(sample_list[samples])), paste0(myData[i,'sample'],"$"))
-    myData[i,counts] <- sample_list[replaceNum,counts]
+    #myData[i,counts] <- sample_list[replaceNum,counts]
       for (a in 1:length(sample_info)) {
         myData[i, sample_info[a]] <- sample_list[replaceNum, sample_info[a]]
       }
@@ -91,11 +92,11 @@ samples="sample"#this is the column with your sample IDs in your sample list
 
     if(any(str_detect(colnames(sample_list), counts))){
       if(any(str_detect(colnames(sample_list), volumes))){ #Are volumes provided?
-        sample_list[counts] <- sample_list[volumes]*sample_list[counts]} else {warning("No volumes found, using counts only")}
+        sample_list[counts] <- as.numeric(sample_list[volumes])*as.numeric(sample_list[counts])} else {warning("No volumes found, using counts only")}
       #Get % total by dividing by total events ("Root")
       myData['new_col'] <- myData$new_col / gs_pop_get_stats(gs, nodes = root)[,3]
       #Multiply by total counts
-      myData['new_col'] <- myData$new_col * as.numeric(myData$counts)
+      myData['new_col'] <- myData$new_col * as.numeric(sample_list[counts])
       colnames(myData)[ncol(myData)] = toString(paste("Total", shortnodeList[i]))
     }else{
       colnames(myData)[ncol(myData)] = toString(paste("Events", shortnodeList[i]))      
