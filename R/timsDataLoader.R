@@ -98,7 +98,7 @@ samples="sample"#this is the column with your sample IDs in your sample list
       #Get % total by dividing by total events ("Root")
       myData$new_col <- myData$new_col / gs_pop_get_stats(gs, nodes = root)[,3]
       #Multiply by total counts
-      myData$new_col <- myData$new_col * as.data.frame(lapply(myData[counts], as.numeric))
+      myData$new_col <- myData$new_col * as.data.frame(lapply(sample_list[counts], as.numeric))
       colnames(myData)[ncol(myData)] = toString(paste("Total", shortnodeList[i]))
     }else{
       colnames(myData)[ncol(myData)] = toString(paste("Events", shortnodeList[i]))      
