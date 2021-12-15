@@ -61,7 +61,9 @@ flowDataCruncher <- function(
       subgroup_names <- unique(my_data[which(colnames(my_data) == subgroup)])
       colnames(my_data)[which(colnames(my_data) == subgroup)] <- "qqqwww"
     }
-  }
+  } else { 
+    type_subgroup = 1
+    subgroup_names = NULL} 
 
   #Are there multiple groups? There kind of needs to be
   if (length(which(colnames(my_data) == group)) == 1) {#Is there a groups column?
@@ -196,10 +198,17 @@ flowDataCruncher <- function(
       
     } else {
       matrix_names <- c("normalized means", "SEM high", "SEM low", "pvalues", "means")
-      test <- c(as.matrix(subgroup_names))
+      if (!is.null(subgroup_names)){test <- c(as.matrix(subgroup_names))
       full_data <- array(c(as.matrix(Nmeans_2d), as.matrix(sem_high_2d), as.matrix(sem_low_2d), as.matrix(pvalues_2d), as.matrix(means_2d)), 
         dim = c(nrow(Nmeans_2d),ncol(Nmeans_2d),5,type_subgroup),
         dimnames = list(rownames(Nmeans_2d), colnames(Nmeans_2d), matrix_names, test))
+      } else {
+        full_data <- array(c(as.matrix(Nmeans_2d), as.matrix(sem_high_2d), as.matrix(sem_low_2d), as.matrix(pvalues_2d), as.matrix(means_2d)), 
+                           dim = c(nrow(Nmeans_2d),ncol(Nmeans_2d),5,type_subgroup),
+                           dimnames = list(rownames(Nmeans_2d), colnames(Nmeans_2d), matrix_names))
+        
+        
+      }
     }
     
     rm(Nmeans_2d)
