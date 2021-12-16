@@ -61,10 +61,20 @@ samples="sample"#this is the column with your sample IDs in your sample list
   if (any(duplicated(myData[samples]))) {warning("You have duplicate sample IDs in your WSP files!")}
   if (debug) {cat("... good!\nPulling sample list info from into new dataframe and combining it with cleaned IDs from the WSP file\n")}   
   
+  #make the columns if they need to be made
+  if(any(str_detect(colnames(sample_list), counts))){myData$counts <- ""}
+  if(any(str_detect(colnames(sample_list), volumes))){myData$volumes <- ""}
+ 
+  
     for (i in 1:nrow(myData)) {
       if (debug) {cat(paste("\r    Hunting for:",myData[i,'sample']))}
-    replaceNum <- stringr::str_which(unlist(as.list(sample_list[samples])), paste0(myData[i,'sample'],"$"))
-    if(any(str_detect(colnames(sample_list), counts))){myData[i,'counts'] <- sample_list[replaceNum,counts]}
+    replaceNum <- stringr::str_which(unlist(as.list(sample_list[samples])), paste0(myData[i,'sample']))
+    if(any(str_detect(colnames(sample_list), counts))){
+       myData[i,'counts'] <- sample_list[replaceNum,counts]
+      }
+    if(any(str_detect(colnames(sample_list), volumes))){
+      myData[i,'volumes'] <- sample_list[replaceNum,volumes]
+      }
     for (a in 1:length(sample_info)) {
         myData[i, sample_info[a]] <- sample_list[replaceNum, sample_info[a]]
       }
@@ -93,12 +103,13 @@ samples="sample"#this is the column with your sample IDs in your sample list
 
     if(any(str_detect(colnames(sample_list), counts))){ 
       if(any(str_detect(colnames(sample_list), volumes))){ 
-        sample_list[counts] <- as.data.frame(lapply(sample_list[volumes], as.numeric))*as.data.frame(lapply(sample_list[counts], as.numeric))
-        } else {warning("No volumes found, using counts only")}
+        myData[counts] <- as.numeric(myData$volumes)*as.numeric(myData$counts)
+      } else {warning("No volumes found, using counts only")}
+    
       #Get % total by dividing by total events ("Root")
       myData$new_col <- myData$new_col / gs_pop_get_stats(gs, nodes = root)[,3]
       #Multiply by total counts
-      myData$new_col <- myData$new_col * as.data.frame(lapply(sample_list[counts], as.numeric))
+      myData$new_col <- myData$new_col * as.numeric(myData$counts)
       colnames(myData)[ncol(myData)] = toString(paste("Total", shortnodeList[i]))
     }else{
       colnames(myData)[ncol(myData)] = toString(paste("Events", shortnodeList[i]))      
