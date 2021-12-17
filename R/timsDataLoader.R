@@ -53,7 +53,7 @@ samples="sample"#this is the column with your sample IDs in your sample list
     temp_list <- as.numeric(unlist(as.list(myData[samples])))
     myData[samples] <- formatC(temp_list, width=max_sample, flag="0") #same for FCS sample IDs
   } else {
-    if (grepl(sample_list[samples], "\\(1\\)", fixed=TRUE)) {string = string = sample_list[samples] <- str_remove(sample_list[samples], "\\(1\\)")} #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
+    if (grepl("(1)", myData$sample)) {myData$sample <- str_remove(myData$sample, "\\(1\\)")} #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
   }
   
   #Making sure sample names are unique
@@ -107,7 +107,8 @@ samples="sample"#this is the column with your sample IDs in your sample list
       } else {warning("No volumes found, using counts only")}
     
       #Get % total by dividing by total events ("Root")
-      myData$new_col <- myData$new_col / gs_pop_get_stats(gs, nodes = root)[,3]
+      myData['new_col'] <- myData['new_col'] / as.data.frame(gs_pop_get_stats(gs, nodes = root)[,3])
+      
       #Multiply by total counts
       myData$new_col <- myData$new_col * as.numeric(myData$counts)
       colnames(myData)[ncol(myData)] = toString(paste("Total", shortnodeList[i]))
