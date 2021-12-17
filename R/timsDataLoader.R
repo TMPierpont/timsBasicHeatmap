@@ -84,7 +84,7 @@ samples="sample"#this is the column with your sample IDs in your sample list
   #Now load all the numbers
   #########################
   
-  if (debug) {cat("... good!\nCHecking to if we should use another pop instead of root")}   
+  if (debug) {cat("... good!\nChecking to if we should use another pop instead of root")}   
   #If someone wants to use something other than root as their main population to normalize to:
   if (is.null(main_event)) {root <- nodelist[1]} else { 
     if (debug) {cat(paste("\nUsing", main_event, "instead"))}   
@@ -103,7 +103,7 @@ samples="sample"#this is the column with your sample IDs in your sample list
 
     if(any(str_detect(colnames(sample_list), counts))){ 
       if(any(str_detect(colnames(sample_list), volumes))){ 
-        myData[counts] <- as.numeric(myData$volumes)*as.numeric(myData$counts)
+        myData['counts'] <- as.numeric(myData$volumes)*as.numeric(myData$counts)
       } else {warning("No volumes found, using counts only")}
     
       #Get % total by dividing by total events ("Root")
@@ -122,6 +122,9 @@ samples="sample"#this is the column with your sample IDs in your sample list
     myData['new_col'] <- gs_pop_get_stats(gs, nodes = nodelist[i], type="percent")[,3]
     colnames(myData)[ncol(myData)] = toString(paste("Percent", shortnodeList[i]))
   }
+  colnames(myData)[colnames(myData) == "counts"] <- counts
+  colnames(myData)[colnames(myData) == "volumes"] <- volumes
+  
   if (debug) {cat("... good!\nDone! returning data!")}
   return(myData)
 }
