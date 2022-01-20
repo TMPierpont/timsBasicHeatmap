@@ -239,7 +239,11 @@ PVHeatmap <- function(
             #were pvalues given? add them if so
             if (!is.null(pvalues)) {
               if (combine_pvalue) {
-                PVHeatmapDrawP(max(pvalues[y,x,]),border_width)
+                if (any(values[y,x,] < 0) && any(values[y,x,] > 0)){
+                  PVHeatmapDrawP(1,border_width) 
+                } else {
+                  PVHeatmapDrawP(max(pvalues[y,x,]),border_width)
+                }
               } else {
                 PVHeatmapDrawP(pvalues[y,x,z],border_width)
               }

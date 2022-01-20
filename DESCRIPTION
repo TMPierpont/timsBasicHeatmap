@@ -1,6 +1,6 @@
 Package: timsBasicHeatmap
 Title: Tools for analyzing manually gated flow data
-Version: 0.0.1.0000
+Version: 0.0.1.1000
 Authors@R: 
     person("Timothy", "Pierpont", , "tmp68@cornell.edu", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
