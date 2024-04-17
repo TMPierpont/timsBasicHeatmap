@@ -1,4 +1,3 @@
-
 #' This grabs flowjo files and extracts data
 #' I could make this combine the files, but it'll be easier to use and more versatile if we just combine them outside this function
 #' @export
@@ -53,7 +52,8 @@ samples="sample"#this is the column with your sample IDs in your sample list
     temp_list <- as.numeric(unlist(as.list(myData[samples])))
     myData[samples] <- formatC(temp_list, width=max_sample, flag="0") #same for FCS sample IDs
   } else {
-    if (grepl("(1)", myData$sample)) {myData$sample <- str_remove(myData$sample, "\\(1\\)")} #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
+    print(myData$sample)
+    #if (grepl("(1)", myData$sample)) {myData$sample <- str_remove(myData$sample, "\\(1\\)")} #sometimes if a file is saved twice, the fcs file gets a (1) and it's a pain in the...
   }
   
   #Making sure sample names are unique
@@ -64,7 +64,6 @@ samples="sample"#this is the column with your sample IDs in your sample list
   #make the columns if they need to be made
   if(any(str_detect(colnames(sample_list), counts))){myData$counts <- ""}
   if(any(str_detect(colnames(sample_list), volumes))){myData$volumes <- ""}
- 
   
     for (i in 1:nrow(myData)) {
       if (debug) {cat(paste("\r    Hunting for:",myData[i,'sample']))}

@@ -92,12 +92,12 @@ flowDataCruncher <- function(
   
   
   if (!is.null(subgroup)) {colnames(my_data)[which(colnames(my_data) == "qqqwww")] <- "subgroup"}
- 
+  
   for(i in 1:type_subgroup) { #if there's more than one subgroup, we'll want to build a multidimensional arrays
-    for(ii in 1:(ncol(my_data))) {
+    for(ii in 2:(ncol(my_data))) {
       #print(paste("sub_box",ii,"is",subgroup_names))
       if (colnames(my_data)[ii] == "group" || colnames(my_data)[ii] == "subgroup") {next} #don't graph these guys
-
+      
       graphDataMain <- my_data[which(colnames(my_data) == "group")]
 
       graphDataMain[2] <- my_data[ii]
@@ -112,9 +112,10 @@ flowDataCruncher <- function(
       } else { #If there isn't any subgroups, then just pull the whole thing over
         graphData <- graphDataMain
       }
-      
-      #rename control group to "control"
+
+            #rename control group to "control"
       graphData <- dplyr::filter(graphData, !is.na(graphData$value)) #Just delete any rows without numbers
+      graphData$value <- as.numeric(graphData$value) #The behavior changed and these need to be explicately converted to numbers now
       means <- aggregate(graphData['value'], list(graphData$group), mean)
       conMeans <- dplyr::filter(means, means$Group.1 == "Control")[1,2]
       normed <- log2(means[2] / as.numeric(conMeans))
@@ -140,7 +141,7 @@ flowDataCruncher <- function(
       ############
       #I'll want to add the bit about the ANOVA testing and stuff, but for now this will test things
       ############
-      
+
 
       if (exists('Nmeans_2d')) {
         Nmeans_2d[ncol(Nmeans_2d)+1] <- normed
