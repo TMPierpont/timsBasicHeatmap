@@ -93,23 +93,25 @@ samples="sample"#this is the column with your sample IDs in your sample list
       return(NULL)
     }
   }
-
+  
   if (debug) {cat("... good!\nGenerating Totals and applying totals")}   
   #Totals first
   myData <- as.data.frame(myData)
+  
+  if(any(str_detect(colnames(sample_list), volumes))){ 
+    myData['counts'] <- as.numeric(myData$volumes)*as.numeric(myData$counts)
+  } else {warning("No volumes found, using counts only")}
+  
   for (i in 2:length(nodelist)) {
     myData['new_col'] <- gs_pop_get_stats(gs, nodes = nodelist[i])[,3]
-
-    if(any(str_detect(colnames(sample_list), counts))){ 
-      if(any(str_detect(colnames(sample_list), volumes))){ 
-        myData['counts'] <- as.numeric(myData$volumes)*as.numeric(myData$counts)
-      } else {warning("No volumes found, using counts only")}
-    
+    if(any(str_detect(colnames(sample_list), counts))){
       #Get % total by dividing by total events ("Root")
-      myData['new_col'] <- myData['new_col'] / as.data.frame(gs_pop_get_stats(gs, nodes = root)[,3])
+      myData['new_col'] <- myData['new_col'] / as.data.frame(gs_pop_get_stats(gs, nodes = root, type="count")[,3])
       
       #Multiply by total counts
+      
       myData$new_col <- myData$new_col * as.numeric(myData$counts)
+      
       colnames(myData)[ncol(myData)] = toString(paste("Total", shortnodeList[i]))
     }else{
       colnames(myData)[ncol(myData)] = toString(paste("Events", shortnodeList[i]))      
